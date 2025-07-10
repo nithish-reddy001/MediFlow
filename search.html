@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Hospital Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      overflow-x: hidden;
+      position: relative;
+      background-image: 
+        linear-gradient(rgba(26, 115, 232, 0.5), rgba(76, 175, 80, 0.4)),
+        url("{{ url_for('static', filename='hospital.jpg') }}");
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+    }
+
+    header {
+      background: linear-gradient(90deg, #1a73e8 0%, #4285f4 100%);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideDown 1s ease-out;
+    }
+
+    header h1 {
+      font-size: 36px;
+      margin: 0;
+      animation: floatText 3s ease-in-out infinite;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes floatText {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    main {
+      padding: 30px;
+    }
+
+    form {
+      background: rgba(173, 216, 230, 0.9);
+      padding: 50px;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      display: inline-block;
+      max-width: 700px;
+      width: 100%;
+      margin-top: 50px;
+      animation: fadeIn 1.2s ease;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    label {
+      font-size: 24px;
+      color: #1a73e8;
+      font-weight: bold;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    input[type="text"] {
+      padding: 22px;
+      width: calc(100% - 44px);
+      border: 2px solid #81C784;
+      border-radius: 15px;
+      margin: 25px 0;
+      font-size: 24px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+    }
+
+    input[type="submit"] {
+      padding: 18px 50px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.3s ease;
+      box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
+    }
+
+    input[type="submit"]:hover {
+      background-color: #388e3c;
+      transform: scale(1.05);
+      box-shadow: 0 7px 18px rgba(56, 142, 60, 0.5);
+    }
+
+    .error {
+      color: #ef5350;
+      font-weight: bold;
+      margin-top: 25px;
+      font-size: 20px;
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .result-card {
+      background: rgba(173, 216, 230, 0.9);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      max-width: 700px;
+      margin: 30px auto;
+      animation: fadeInUp 1s ease;
+      position: relative;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .result-card::before {
+      content: "🩺";
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 50px;
+      opacity: 0.7;
+      animation: pulseEmoji 3s infinite;
+    }
+
+    @keyframes pulseEmoji {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .emoji-doctor {
+      font-size: 60px;
+      margin-bottom: 15px;
+      animation: fadeIn 1.2s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: #1a73e8;
+      font-size: 28px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 18px;
+      align-items: center;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #424242;
+    }
+
+    .info-value {
+      color: #212121;
+    }
+
+    .badge {
+      background-color: #bbdefb;
+      color: #1976d2;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      animation: pulse 2s infinite;
+      display: inline-block;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 8px rgba(25, 118, 210, 0);
+      }
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #1a73e8;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: background-color 0.3s ease, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-link:hover {
+      background-color: #0d47a1;
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Floating Emoji Styles */
+    .floating-search-emoji {
+      position: fixed;
+      font-size: 8em;
+      opacity: 0.6;
+      animation: floatAcrossScreen 15s infinite linear;
+      pointer-events: none;
+      z-index: 1000;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      top: 10%;
+    }
+
+    .floating-medical-emoji {
+      position: fixed;
+      font-size: 8em;
+      opacity: 0.6;
+      animation: floatAcrossScreenReverse 15s infinite linear;
+      pointer-events: none;
+      z-index: 1000;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      top: 70%;
+    }
+
+    @keyframes floatAcrossScreen {
+      0% { left: -10%; transform: rotate(0deg) scale(0.8); }
+      25% { left: 50%; transform: rotate(90deg) scale(1.1); }
+      50% { left: 110%; transform: rotate(180deg) scale(0.9); }
+      50.1% { left: -10%; transform: rotate(180deg) scale(0.9); }
+      75% { left: 30%; transform: rotate(270deg) scale(1.2); }
+      100% { left: -10%; transform: rotate(360deg) scale(0.8); }
+    }
+
+    @keyframes floatAcrossScreenReverse {
+      0% { left: 110%; transform: rotate(0deg) scale(0.8); }
+      25% { left: 50%; transform: rotate(-90deg) scale(1.1); }
+      50% { left: -10%; transform: rotate(-180deg) scale(0.9); }
+      50.1% { left: 110%; transform: rotate(-180deg) scale(0.9); }
+      75% { left: 70%; transform: rotate(-270deg) scale(1.2); }
+      100% { left: 110%; transform: rotate(-360deg) scale(0.8); }
+    }
+
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🏥 Smart Hospital Search 🔍 👩‍⚕️</h1>
+  </header>
+
+  <main>
+    {% if step == "initial" %}
+      <form action="/search" method="get">
+        <label for="hospital_name">🏥 Enter Hospital Name:</label>
+        <input type="text" id="hospital_name" name="hospital_name" required>
+        <input type="submit" value="Search">
+      </form>
+
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+    {% endif %}
+
+    {% if step == "details" %}
+      {% if hospital_info %}
+        <div class="result-card">
+          <div class="emoji-doctor">👨‍⚕️</div>
+          <h2>{{ hospital_info.get('Hospital Name', 'N/A') }}</h2>
+
+          <div class="info-row">
+            <div class="info-label">OPD Doctors</div>
+            <div class="info-value">
+              <span class="badge">{{ hospital_info.get('OPD Doctors', 'N/A') }}</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Beds Available</div>
+            <div class="info-value">
+              <span class="badge">{{ hospital_info.get('Beds', 'N/A') }}</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Admissions of Patients</div>
+            <div class="info-value">
+              <span class="badge">{{ hospital_info.get('Admissions of Patients', 'N/A') }}</span>
+            </div>
+          </div>
+
+          <a class="back-link" href="/hospitals-status">🔙 Search Another Hospital</a>
+        </div>
+      {% else %}
+        <div class="error">No hospital details found for your search. Please try again.</div>
+        <a class="back-link" href="/hospitals-status">🔙 Go Back to Search</a>
+      {% endif %}
+    {% endif %}
+  </main>
+
+  <div class="floating-search-emoji">🔍</div>
+  <div class="floating-medical-emoji">🩺</div>
+</body>
+</html>
